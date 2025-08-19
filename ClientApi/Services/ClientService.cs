@@ -2,6 +2,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using ClientApi.Models;
 using System.Globalization;
+using System.Linq;
 
 namespace ClientApi.Services;
 
@@ -16,14 +17,14 @@ public class ClientService : IClientService
         _csvFilePath = Path.Combine(environment.ContentRootPath, "..", "Data", "clients.csv");
     }
 
-    public async Task<IEnumerable<Client>> GetClientsByCountryCodeAsync(string countryCode)
+    public Task<IEnumerable<Client>> GetClientsByCountryCodeAsync(string countryCode)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(countryCode))
             {
                 _logger.LogWarning("Country code parameter is null or empty");
-                return Enumerable.Empty<Client>();
+                return Task.FromResult<IEnumerable<Client>>(Enumerable.Empty<Client>());
             }
 
             if (!File.Exists(_csvFilePath))
@@ -41,7 +42,7 @@ public class ClientService : IClientService
             using var reader = new StreamReader(_csvFilePath);
             using var csv = new CsvReader(reader, config);
 
-            var clients = await csv.GetRecordsAsync<Client>().ToListAsync();
+            var clients = csv.GetRecords<Client>().ToList();
             
             var filteredClients = clients
                 .Where(c => string.Equals(c.CountryCode, countryCode, StringComparison.OrdinalIgnoreCase))
@@ -50,7 +51,7 @@ public class ClientService : IClientService
             _logger.LogInformation("Found {Count} clients for country code: {CountryCode}", 
                 filteredClients.Count, countryCode);
 
-            return filteredClients;
+            return Task.FromResult<IEnumerable<Client>>(filteredClients);
         }
         catch (Exception ex)
         {
