@@ -110,20 +110,45 @@ GET /clients?country_code=DE
 
 **Response Format:**
 ```json
-[
-  {
-    "clientId": 4,
-    "name": "John Smith",
-    "taxId": "TX8543",
-    "countryCode": "US"
-  },
-  {
-    "clientId": 7,
-    "name": "Liam Martinez",
-    "taxId": "TX3458",
-    "countryCode": "US"
-  }
-]
+{
+  "status": true,
+  "code": 200,
+  "message": "Successfully retrieved 5 clients for country code: US",
+  "data": [
+    {
+      "clientId": 4,
+      "name": "John Smith",
+      "taxId": "TX8543",
+      "countryCode": "US"
+    },
+    {
+      "clientId": 7,
+      "name": "Liam Martinez",
+      "taxId": "TX3458",
+      "countryCode": "US"
+    }
+  ]
+}
+```
+
+**Empty Response Format:**
+```json
+{
+  "status": true,
+  "code": 200,
+  "message": "No records found for country code: INVALID",
+  "data": []
+}
+```
+
+**Error Response Format:**
+```json
+{
+  "status": false,
+  "code": 400,
+  "message": "Country code parameter is required",
+  "error": null
+}
 ```
 
 **HTTP Status Codes:**
