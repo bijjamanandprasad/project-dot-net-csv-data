@@ -1,0 +1,60 @@
+using Microsoft.AspNetCore.Mvc;
+using ClientApi.Models;
+using ClientApi.Services;
+
+namespace ClientApi.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class ClientsController : ControllerBase
+{
+    private readonly IClientService _clientService;
+    private readonly ILogger<ClientsController> _logger;
+
+    public ClientsController(IClientService clientService, ILogger<ClientsController> logger)
+    {
+        _clientService = clientService;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Gets clients filtered by country code
+    /// </summary>
+    /// <param name="country_code">The country code to filter by (e.g., US, CA, DE, AU, UK)</param>
+    /// <returns>List of clients matching the country code</returns>
+    /// <response code="200">Returns the list of clients</response>
+    /// <response code="400">If the country_code parameter is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<Client>), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<IEnumerable<Client>>> GetClients([FromQuery] string country_code)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(country_code))
+            {
+                _logger.LogWarning("Country code parameter is missing or empty");
+                return BadRequest("Country code parameter is required");
+            }
+
+            var clients = await _clientService.GetClientsByCountryCodeAsync(country_code);
+            
+            _logger.LogInformation("Successfully retrieved {Count} clients for country code: {CountryCode}", 
+                clients.Count(), country_code);
+
+            return Ok(clients);
+        }
+        catch (FileNotFoundException ex)
+        {
+            _logger.LogError(ex, "CSV file not found");
+            return StatusCode(500, "Data source not available");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred while retrieving clients");
+            return StatusCode(500, "An unexpected error occurred");
+        }
+    }
+} 
