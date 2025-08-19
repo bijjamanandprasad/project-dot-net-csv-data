@@ -70,11 +70,28 @@ project_dot_net/
    - API Base URL: `https://localhost:7001` or `http://localhost:5000`
    - Swagger UI: `https://localhost:7001/swagger` or `http://localhost:5000/swagger`
 
+## Authentication
+
+The API is protected with a static bearer token authentication system.
+
+### API Key
+- **Header Name**: `X-API-Key`
+- **Format**: `Bearer {token}`
+- **Valid Token**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNsaWVudEFQSSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+### Example Usage
+```bash
+curl -H "X-API-Key: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNsaWVudEFQSSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" \
+     http://localhost:5000/clients?country_code=US
+```
+
 ## API Endpoints
 
 ### GET /clients
 
 Retrieves clients filtered by country code.
+
+**Authentication Required**: Yes
 
 **Query Parameters:**
 - `country_code` (required): The country code to filter by (e.g., US, CA, DE, AU, UK)
@@ -112,6 +129,7 @@ GET /clients?country_code=DE
 **HTTP Status Codes:**
 - `200 OK`: Successfully retrieved clients
 - `400 Bad Request`: Missing or invalid country_code parameter
+- `401 Unauthorized`: Missing or invalid API key
 - `500 Internal Server Error`: Server error or data source unavailable
 
 ## Data Structure
@@ -164,16 +182,21 @@ The CSV file (`Data/clients.csv`) contains the following columns:
 ### Using curl
 ```bash
 # Get US clients
-curl -X GET "https://localhost:7001/clients?country_code=US"
+curl -H "X-API-Key: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNsaWVudEFQSSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" \
+     -X GET "http://localhost:5000/clients?country_code=US"
 
 # Get Canadian clients
-curl -X GET "https://localhost:7001/clients?country_code=CA"
+curl -H "X-API-Key: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNsaWVudEFQSSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" \
+     -X GET "http://localhost:5000/clients?country_code=CA"
 ```
 
 ### Using PowerShell
 ```powershell
 # Get US clients
-Invoke-RestMethod -Uri "https://localhost:7001/clients?country_code=US" -Method Get
+$headers = @{
+    "X-API-Key" = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNsaWVudEFQSSIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+}
+Invoke-RestMethod -Uri "http://localhost:5000/clients?country_code=US" -Method Get -Headers $headers
 ```
 
 ## Available Country Codes

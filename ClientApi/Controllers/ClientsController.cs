@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using ClientApi.Models;
 using ClientApi.Services;
+using ClientApi.Attributes;
 
 namespace ClientApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[ApiKey] // Add authentication requirement
 public class ClientsController : ControllerBase
 {
     private readonly IClientService _clientService;
@@ -24,10 +26,12 @@ public class ClientsController : ControllerBase
     /// <returns>List of clients matching the country code</returns>
     /// <response code="200">Returns the list of clients</response>
     /// <response code="400">If the country_code parameter is invalid</response>
+    /// <response code="401">If the API key is missing or invalid</response>
     /// <response code="500">If there was an internal server error</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Client>), 200)]
     [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<IEnumerable<Client>>> GetClients([FromQuery] string country_code)
     {
